@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist: Quarto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #2DD4BF;
+            --primary-dark: #0D9488;
+            --whatsapp: #25D366;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-main: #0F172A;
+            --text-sub: #64748B;
+            --border: #E2E8F0;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-left p { font-size: 13px; color: var(--text-sub); font-weight: 500; }
+
+        .btn-info {
+            background: #F0FDF4;
+            color: #16A34A;
+            border: 1px solid #DCFCE7;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .main { max-width: 480px; margin: 0 auto; padding: 1.5rem; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .card-header { 
+            padding: 2rem 1.5rem; 
+            background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .progress-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+        .progress-label { font-size: 14px; font-weight: 700; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 1px; }
+        .pct-text { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: var(--text-main); }
+
+        .progress-bar { height: 10px; background: #CCFBF1; border-radius: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); width: 0%; }
+
+        .lista-container { padding: 0.5rem 0; }
+
+        .tarefa-item {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #F1F5F9;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation;         
+        }
+        .tarefa-item:last-child { border-bottom: none; }
+
+        .checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2.5px solid #CBD5E1;
+            border-radius: 10px;
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .checkbox.checked { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
+
+        .tarefa-text { font-size: 16px; font-weight: 500; color: #334155; }
+        .tarefa-text.done { text-decoration: line-through; color: #94A3B8; }
+
+        .footer-action { padding: 1.5rem; background: #F8FAFC; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+
+        .status-msg {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            background: #E2E8F0;
+            color: #64748B;
+            text-decoration: none;
+            display: block;
+        }
+
+        .status-msg.complete { background: var(--whatsapp); color: white; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3); animation: pulseBtn 2s infinite; }
+
+        .btn-limpar {
+            background: transparent; color: #94A3B8; border: 1px dashed #CBD5E1; padding: 10px; border-radius: var(--radius-md);
+            font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-limpar.confirmar { background: #FFF1F2; color: #E11D48; border-style: solid; border-color: #FFE4E6; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+        }
+        .modal-content { background: white; border-radius: var(--radius-lg); max-width: 400px; width: 100%; overflow: hidden; animation: modalShow 0.3s ease-out; }
+        @keyframes modalShow { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { padding: 20px; background: var(--primary); color: white; text-align: center; }
+        .modal-body { padding: 20px; }
+        .beneficio-box { padding: 15px; border-radius: 16px; margin-bottom: 15px; }
+        .box-sim { background: #F0FDF4; border: 1px solid #DCFCE7; }
+        .box-nao { background: #FFF1F2; border: 1px solid #FFE4E6; }
+        .box-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+        .beneficio-item { font-size: 13px; color: #334155; margin-bottom: 4px; display: flex; gap: 8px; }
+        .btn-fechar { width: 100%; padding: 12px; background: #F1F5F9; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+
+        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>Quarto</h1>
+        <p id="data-txt">Carregando...</p>
+    </div>
+    <button class="btn-info" onclick="toggleModal(true)">🎁 Benefícios</button>
+</header>
+
+<div class="main">
+    <div class="card">
+        <div class="card-header">
+            <div class="progress-info">
+                <div class="progress-label">Concluído</div>
+                <div id="pct-val" class="pct-text">0%</div>
+            </div>
+            <div class="progress-bar">
+                <div id="fill" class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lista-container" id="lista"></div>
+        <div class="footer-action">
+            <button class="btn-limpar" id="btn-limpar">Limpar Seleções</button>
+            <a id="msg" class="status-msg">Aguardando progresso...</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalBeneficios" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header"><h3>Regras do Combinado 🤝</h3></div>
+        <div class="modal-body">
+            <div class="beneficio-box box-sim">
+                <div class="box-title" style="color: #16A34A;">✅ Arrumado (Celular Liberado)</div>
+                <div class="beneficio-item">🔓 Pode pegar o celular</div>
+                <div class="beneficio-item">🏃 Pode sair pra rua e Treino</div>
+                <div class="beneficio-item" style="margin-top:8px; font-weight: 700;">⭐ Bônus: +30 min (se manter o dia todo)</div>
+            </div>
+            <div class="beneficio-box box-nao" style="margin-bottom:0;">
+                <div class="box-title" style="color: #E11D48;">❌ Não Arrumado (Confiscado)</div>
+                <div class="beneficio-item">🚫 Celular confiscado</div>
+                <div class="beneficio-item">🏠 Não pode sair nem treinar</div>
+                <div class="beneficio-item" style="margin-top:8px; font-style: italic; font-size: 11px;">Efeito rebote: perde tempo nos próximos dias.</div>
+            </div>
+            <button class="btn-fechar" onclick="toggleModal(false)">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SEU_TELEFONE = "5562994443723";
+    const TAREFAS = [
+        "Arrumar a cama", 
+        "Guardar tênis e chinelos", 
+        "Roupa suja no cesto", 
+        "Guardar mochila", 
+        "Arrumar guarda roupas dobrar e guardar", 
+        "Limpar móveis com pano úmido", 
+        "Guardar brinquedos", 
+        "Limpar a parte de cima da beliche", 
+        "Varrer garagem", 
+        "Limpar chão do quarto"
+    ];
+
+    const hojeID = new Date().toISOString().slice(0, 10);
+
+    function atualizarTela() {
+        const listaDiv = document.getElementById('lista');
+        const dataTxt = document.getElementById('data-txt');
+        const fill = document.getElementById('fill');
+        const pctVal = document.getElementById('pct-val');
+        const msgDiv = document.getElementById('msg');
+        
+        if (!listaDiv) return;
+
+        dataTxt.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        let concluidas = 0;
+        let html = "";
+        TAREFAS.forEach((texto, i) => {
+            const salva = localStorage.getItem(`quarto_${hojeID}_${i}`) === "true";
+            if (salva) concluidas++;
+            html += `
+                <div class="tarefa-item" onclick="cliqueTarefa(${i})">
+                    <div class="checkbox ${salva ? 'checked' : ''}">
+                        ${salva ? '<svg width="14" height="14" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>' : ''}
+                    </div>
+                    <div class="tarefa-text ${salva ? 'done' : ''}">${texto}</div>
+                </div>`;
+        });
+
+        const pct = Math.round((concluidas / TAREFAS.length) * 100);
+        listaDiv.innerHTML = html;
+        fill.style.width = pct + "%";
+        pctVal.innerText = pct + "%";
+        
+        if(pct === 100) {
+            msgDiv.innerText = "🎯 ENVIAR RELATÓRIO";
+            msgDiv.classList.add('complete');
+            msgDiv.href = `https://wa.me/${SEU_TELEFONE}?text=${encodeURIComponent('Tudo pronto! 🎯\nAs tarefas do Quarto foram 100% concluídas.')}`;
+            msgDiv.target = "_blank";
+        } else {
+            msgDiv.innerText = concluidas + " de " + TAREFAS.length + " concluídas";
+            msgDiv.classList.remove('complete');
+            msgDiv.removeAttribute('href');
+        }
+    }
+
+    window.cliqueTarefa = function(i) {
+        const chave = `quarto_${hojeID}_${i}`;
+        const estadoAtual = localStorage.getItem(chave) === "true";
+        localStorage.setItem(chave, String(!estadoAtual));
+        atualizarTela();
+    }
+
+    window.toggleModal = function(abrir) {
+        document.getElementById('modalBeneficios').style.display = abrir ? 'flex' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnLimpar = document.getElementById('btn-limpar');
+        let aguardando = false;
+
+        btnLimpar.addEventListener('click', function() {
+            if (!aguardando) {
+                aguardando = true;
+                btnLimpar.innerText = "Limpar Seleção?";
+                btnLimpar.classList.add('confirmar');
+                setTimeout(() => {
+                    aguardando = false;
+                    btnLimpar.innerText = "Limpar Seleções";
+                    btnLimpar.classList.remove('confirmar');
+                }, 3000);
+            } else {
+                TAREFAS.forEach((_, i) => localStorage.removeItem(`quarto_${hojeID}_${i}`));
+                aguardando = false;
+                btnLimpar.innerText = "Limpar Seleções";
+                btnLimpar.classList.remove('confirmar');
+                atualizarTela();
+            }
+        });
+
+        atualizarTela();
+    });
+</script>
+</body>
+</html>
