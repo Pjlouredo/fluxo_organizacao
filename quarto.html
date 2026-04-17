@@ -19,6 +19,7 @@
             --border: #E2E8F0;
             --radius-lg: 24px;
             --radius-md: 16px;
+            --aura-gold: #D4AF37;
         }
 
         body {
@@ -42,7 +43,9 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .header-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .status-verde { color: #16A34A; font-weight: bold; }
+
+        .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; }
         .header-left p { font-size: 13px; color: var(--text-sub); font-weight: 500; }
 
         .btn-info {
@@ -55,6 +58,7 @@
             font-weight: 700;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s;
         }
 
         .main { max-width: 480px; margin: 0 auto; padding: 1.5rem; }
@@ -89,7 +93,7 @@
             border-bottom: 1px solid #F1F5F9;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent; 
-            touch-action: manipulation;         
+            transition: all 0.2s ease;
         }
         .tarefa-item:last-child { border-bottom: none; }
 
@@ -103,11 +107,16 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .checkbox.checked { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
 
-        .tarefa-text { font-size: 16px; font-weight: 500; color: #334155; }
+        /* ESTRUTURA DE TEXTO ESTILO JOGO */
+        .tarefa-content { display: flex; flex-direction: column; gap: 2px; }
+        .tarefa-text { font-size: 16px; font-weight: 500; color: #334155; transition: all 0.2s; }
         .tarefa-text.done { text-decoration: line-through; color: #94A3B8; }
+        .tarefa-subtext { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--aura-gold); }
+        .done + .tarefa-subtext { opacity: 0.5; color: #94A3B8; }
 
         .footer-action { padding: 1.5rem; background: #F8FAFC; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
 
@@ -121,13 +130,14 @@
             color: #64748B;
             text-decoration: none;
             display: block;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .status-msg.complete { background: var(--whatsapp); color: white; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3); animation: pulseBtn 2s infinite; }
 
         .btn-limpar {
             background: transparent; color: #94A3B8; border: 1px dashed #CBD5E1; padding: 10px; border-radius: var(--radius-md);
-            font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase;
+            font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .btn-limpar.confirmar { background: #FFF1F2; color: #E11D48; border-style: solid; border-color: #FFE4E6; }
 
@@ -154,7 +164,7 @@
 
 <header>
     <div class="header-left">
-        <h1>Quarto</h1>
+        <h1>SERVER: ROBLOX HOME <br>(<span class="status-verde">On-line</span>)</h1>
         <p id="data-txt">Carregando...</p>
     </div>
     <button class="btn-info" onclick="toggleModal(true)">🎁 Benefícios</button>
@@ -164,7 +174,7 @@
     <div class="card">
         <div class="card-header">
             <div class="progress-info">
-                <div class="progress-label">Concluído</div>
+                <div class="progress-label">Farmando Aura</div>
                 <div id="pct-val" class="pct-text">0%</div>
             </div>
             <div class="progress-bar">
@@ -202,17 +212,19 @@
 
 <script>
     const SEU_TELEFONE = "5562994443723";
+    
+    // Lista de tarefas do Quarto com sistema de Aura Coins
     const TAREFAS = [
-        "Arrumar a cama", 
-        "Guardar tênis e chinelos", 
-        "Roupa suja no cesto", 
-        "Guardar mochila", 
-        "Arrumar guarda roupas dobrar e guardar", 
-        "Limpar móveis com pano úmido", 
-        "Guardar brinquedos", 
-        "Limpar a parte de cima da beliche", 
-        "Varrer garagem", 
-        "Limpar chão do quarto"
+        "Arrumar a cama | +10 Aura Coins",
+        "Guardar tênis e chinelos | +10 Aura Coins",
+        "Roupa suja no cesto | +10 Aura Coins",
+        "Guardar mochila | +10 Aura Coins",
+        "Arrumar guarda roupas | +20 Aura Coins",
+        "Limpar móveis (pano úmido) | +15 Aura Coins",
+        "Guardar brinquedos | +10 Aura Coins",
+        "Limpar topo da beliche | +15 Aura Coins",
+        "Varrer garagem | +15 Aura Coins",
+        "Limpar chão do quarto | +20 Aura Coins"
     ];
 
     const hojeID = new Date().toISOString().slice(0, 10);
@@ -230,15 +242,22 @@
 
         let concluidas = 0;
         let html = "";
-        TAREFAS.forEach((texto, i) => {
+        
+        TAREFAS.forEach((item, i) => {
             const salva = localStorage.getItem(`quarto_${hojeID}_${i}`) === "true";
             if (salva) concluidas++;
+            
+            const [titulo, subtexto] = item.split(" | ");
+
             html += `
                 <div class="tarefa-item" onclick="cliqueTarefa(${i})">
                     <div class="checkbox ${salva ? 'checked' : ''}">
                         ${salva ? '<svg width="14" height="14" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>' : ''}
                     </div>
-                    <div class="tarefa-text ${salva ? 'done' : ''}">${texto}</div>
+                    <div class="tarefa-content">
+                        <div class="tarefa-text ${salva ? 'done' : ''}">${titulo}</div>
+                        <div class="tarefa-subtext">${subtexto}</div>
+                    </div>
                 </div>`;
         });
 
@@ -277,7 +296,7 @@
         btnLimpar.addEventListener('click', function() {
             if (!aguardando) {
                 aguardando = true;
-                btnLimpar.innerText = "Limpar Seleção?";
+                btnLimpar.innerText = "Confirmar?";
                 btnLimpar.classList.add('confirmar');
                 setTimeout(() => {
                     aguardando = false;

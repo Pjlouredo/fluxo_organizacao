@@ -19,6 +19,7 @@
             --border: #E2E8F0;
             --radius-lg: 24px;
             --radius-md: 16px;
+            --aura-gold: #D4AF37;
         }
 
         body {
@@ -42,7 +43,9 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .header-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .status-verde { color: #16A34A; font-weight: bold; }
+
+        .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; }
         .header-left p { font-size: 13px; color: var(--text-sub); font-weight: 500; }
 
         .btn-info {
@@ -90,7 +93,6 @@
             border-bottom: 1px solid #F1F5F9;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent; 
-            touch-action: manipulation;         
             transition: all 0.2s ease;
         }
         .tarefa-item:last-child { border-bottom: none; }
@@ -109,8 +111,11 @@
         }
         .checkbox.checked { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
 
+        .tarefa-content { display: flex; flex-direction: column; gap: 2px; }
         .tarefa-text { font-size: 16px; font-weight: 500; color: #334155; transition: all 0.2s; }
         .tarefa-text.done { text-decoration: line-through; color: #94A3B8; }
+        .tarefa-subtext { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--aura-gold); }
+        .done + .tarefa-subtext { opacity: 0.5; color: #94A3B8; }
 
         .footer-action { padding: 1.5rem; background: #F8FAFC; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
 
@@ -158,7 +163,7 @@
 
 <header>
     <div class="header-left">
-        <h1>Cozinha</h1>
+        <h1>SERVER: ROBLOX HOME <br>(<span class="status-verde">On-line</span>)</h1>
         <p id="data-txt">Carregando...</p>
     </div>
     <button class="btn-info" onclick="toggleModal(true)">🎁 Benefícios</button>
@@ -168,7 +173,7 @@
     <div class="card">
         <div class="card-header">
             <div class="progress-info">
-                <div class="progress-label">Concluído</div>
+                <div class="progress-label">Farmando Aura</div>
                 <div id="pct-val" class="pct-text">0%</div>
             </div>
             <div class="progress-bar">
@@ -206,17 +211,19 @@
 
 <script>
     const SEU_TELEFONE = "5562994443723";
+    
+    // Lista de tarefas da Cozinha com sistema de Aura Coins
     const TAREFAS = [
-        "Arrumar a cama",
-        "Guardar tênis e chinelos",
-        "Roupa suja no cesto",
-        "Guardar mochila",
-        "Arrumar guarda roupas dobrar e guardar",
-        "Lavar louça do almoço",
-        "Manter pia limpa e seca",
-        "Limpar balcões",
-        "Juntar objetos da área externa",
-        "Colocar comida e água pra Lola"
+        "Arrumar a cama | +10 Aura Coins",
+        "Guardar tênis e chinelos | +10 Aura Coins",
+        "Roupa suja no cesto | +10 Aura Coins",
+        "Guardar mochila | +10 Aura Coins",
+        "Arrumar guarda roupas | +20 Aura Coins",
+        "Lavar louça do almoço | +25 Aura Coins",
+        "Manter pia limpa e seca | +15 Aura Coins",
+        "Limpar balcões | +15 Aura Coins",
+        "Juntar objetos área externa | +15 Aura Coins",
+        "Comida e água da Lola | +10 Aura Coins"
     ];
 
     const hojeID = new Date().toISOString().slice(0, 10);
@@ -234,15 +241,23 @@
 
         let concluidas = 0;
         let html = "";
-        TAREFAS.forEach((texto, i) => {
+        
+        TAREFAS.forEach((item, i) => {
             const salva = localStorage.getItem(`cozinha_${hojeID}_${i}`) === "true";
             if (salva) concluidas++;
-            html += `<div class="tarefa-item" onclick="cliqueTarefa(${i})">
-                <div class="checkbox ${salva ? 'checked' : ''}">
-                    ${salva ? '<svg width="14" height="14" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>' : ''}
-                </div>
-                <div class="tarefa-text ${salva ? 'done' : ''}">${texto}</div>
-            </div>`;
+            
+            const [titulo, subtexto] = item.split(" | ");
+
+            html += `
+                <div class="tarefa-item" onclick="cliqueTarefa(${i})">
+                    <div class="checkbox ${salva ? 'checked' : ''}">
+                        ${salva ? '<svg width="14" height="14" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>' : ''}
+                    </div>
+                    <div class="tarefa-content">
+                        <div class="tarefa-text ${salva ? 'done' : ''}">${titulo}</div>
+                        <div class="tarefa-subtext">${subtexto}</div>
+                    </div>
+                </div>`;
         });
 
         const pct = Math.round((concluidas / TAREFAS.length) * 100);
